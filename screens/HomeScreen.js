@@ -21,6 +21,7 @@ const HomeScreen = () => {
           id: doc.id
         }))
         setPrList(filteredData)
+        console.log(prList)
       } catch (error) {
         console.log(error)
       }
@@ -53,9 +54,9 @@ const HomeScreen = () => {
       </TouchableOpacity>
 
       <View>
-        {prList.map((pr) => (
+        {/* {prList.map((pr) => (
           <Text>Squat: {pr.squat}</Text>
-        ))}
+        ))} */}
       </View>
     </View>
   )
