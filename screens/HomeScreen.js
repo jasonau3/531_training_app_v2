@@ -1,67 +1,79 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { useNavigation } from '@react-navigation/native'
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 
-import { auth, db } from '../firebase'
-import { getDocs, collection } from 'firebase/firestore'
+import { auth, db } from '../firebase';
+import { getDocs, collection, doc } from 'firebase/firestore';
+
+import UpdatePRComponent from '../components/UpdatePRComponent';
 
 const HomeScreen = () => {
-  const [prList, setPrList] = useState('')
+    const [personalRecords, setPersonalRecords] = useState(null);
 
-  const prCollectionRef = collection(db, 'personal_records')
+    const usersCollectionRef = collection(db, 'users');
+    const userDocRef = doc(usersCollectionRef, auth.currentUser.uid);
+    const personalRecordsCollectionRef = collection(
+        userDocRef,
+        'personal_records'
+    );
 
-  useEffect(() => {
-    const getPR = async () => {
-      // READ DATA
-      // SET PrList
-      try {
-        const data = await getDocs(prCollectionRef)
-        const filteredData = data.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id
-        }))
-        setPrList(filteredData)
-        console.log(prList)
-      } catch (error) {
-        console.log(error)
-      }
-    }
+    useEffect(() => {
+        const fetchPersonalRecords = async () => {
+            try {
+                const personalRecordsSnapshot = await getDocs(
+                    personalRecordsCollectionRef
+                );
+                const personalRecordsData = personalRecordsSnapshot.docs.map(
+                    (doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    })
+                );
+                setPersonalRecords(personalRecordsData);
+            } catch (error) {
+                console.error('Error fetching personal records:', error);
+            }
+        };
 
-    getPR()
-  }, [])
+        fetchPersonalRecords();
+    }, []);
 
-  const navigation = useNavigation()
+    const navigation = useNavigation();
 
-  const handleSignOut = async () => {
-    auth
-      .signOut()
-      .then(() => {
-        navigation.replace('Login')
-      })
-      .catch((error) => {
-        console.log(error)
-      })
-  }
+    const handleSignOut = async () => {
+        auth.signOut()
+            .then(() => {
+                navigation.replace('Login');
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    };
 
-  return (
-    <View>
-      <Text>{auth.currentUser?.email}</Text>
-      <TouchableOpacity
-        onPress={handleSignOut}
-        style={[styles.button, styles.buttonOther]}
-      >
-        <Text style={styles.buttonOtherText}>Sign out</Text>
-      </TouchableOpacity>
+    return (
+        <View style={styles.container}>
+            <Text>{auth.currentUser?.email}</Text>
+            <TouchableOpacity
+                onPress={handleSignOut}
+                style={[styles.button, styles.buttonOther]}
+            >
+                <Text style={styles.buttonOtherText}>Sign out</Text>
+            </TouchableOpacity>
 
-      <View>
-        {/* {prList.map((pr) => (
-          <Text>Squat: {pr.squat}</Text>
-        ))} */}
-      </View>
-    </View>
-  )
-}
+            <UpdatePRComponent
+                personalRecords={personalRecords}
+                setPersonalRecords={setPersonalRecords}
+            />
+        </View>
+    );
+};
 
-export default HomeScreen
+export default HomeScreen;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        padding: 25,
+    },
+});
