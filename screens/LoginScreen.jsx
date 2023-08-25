@@ -4,7 +4,7 @@ import {
     View,
     KeyboardAvoidingView,
     TextInput,
-    TouchableOpacity,
+    Pressable,
     Image,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
@@ -17,6 +17,8 @@ import {
     signInWithEmailAndPassword,
     signInWithPopup,
 } from 'firebase/auth';
+
+import { PRIMARY_COLOR } from '../Color.js';
 
 const LoginScreen = () => {
     const [email, setEmail] = useState('');
@@ -137,7 +139,7 @@ const LoginScreen = () => {
             </View>
 
             <View style={styles.buttonContainer}>
-                <TouchableOpacity
+                <Pressable
                     onPress={handleGoogleLogin}
                     style={[styles.button, styles.buttonOther]}
                 >
@@ -149,16 +151,16 @@ const LoginScreen = () => {
                     <Text style={styles.buttonOtherText}>
                         Continue with Google
                     </Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleLogin} style={styles.button}>
+                </Pressable>
+                <Pressable onPress={handleLogin} style={styles.button}>
                     <Text style={styles.buttonText}>Login</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                </Pressable>
+                <Pressable
                     onPress={handleSignUp}
                     style={[styles.button, styles.buttonOutline]}
                 >
                     <Text style={styles.buttonOutlineText}>Register</Text>
-                </TouchableOpacity>
+                </Pressable>
             </View>
         </KeyboardAvoidingView>
     );
@@ -189,7 +191,7 @@ const styles = StyleSheet.create({
         marginTop: 40,
     },
     button: {
-        backgroundColor: '#0782F9',
+        backgroundColor: PRIMARY_COLOR,
         width: '100%',
         padding: 15,
         borderRadius: 10,
@@ -198,7 +200,7 @@ const styles = StyleSheet.create({
     },
     buttonOutline: {
         backgroundColor: '#fff',
-        borderColor: '#0782F9',
+        borderColor: PRIMARY_COLOR,
         borderWidth: 2,
     },
     buttonOther: {
@@ -212,7 +214,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     buttonOutlineText: {
-        color: '#0782F9',
+        color: PRIMARY_COLOR,
         fontWeight: '700',
         fontSize: 16,
     },

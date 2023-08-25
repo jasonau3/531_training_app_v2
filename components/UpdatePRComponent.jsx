@@ -1,21 +1,12 @@
 import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-} from 'react-native';
-
+import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { collection, setDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import { PRIMARY_COLOR } from '../Color.js';
 
 const UpdatePRComponent = ({ personalRecords, setPersonalRecords }) => {
-    console.log(personalRecords);
-
     const [editedRecords, setEditedRecords] = useState([]);
 
-    // ONLY CHANGES THE USER SCREEN, NOT THE DATABASE
     const handleInputChange = (index, field, value) => {
         const newEditedRecords = [...editedRecords];
         newEditedRecords[index] = {
@@ -25,16 +16,7 @@ const UpdatePRComponent = ({ personalRecords, setPersonalRecords }) => {
         setEditedRecords(newEditedRecords);
     };
 
-    // UPLOAD TO DATABASE
-    const handleSaveChanges = async () => {
-        // First, save changes to personal records to update user screen
-        const updatedRecords = personalRecords.map((pr, index) => {
-            return { ...pr, ...editedRecords[index] };
-        });
-        setPersonalRecords(updatedRecords);
-        setEditedRecords([]);
-
-        // Then, save to collection
+    const saveChangesToDatabase = async (updatedRecords) => {
         const users = collection(db, 'users');
         const userDocRef = doc(users, auth.currentUser.uid);
         const personalRecordsCollectionRef = collection(
@@ -42,15 +24,26 @@ const UpdatePRComponent = ({ personalRecords, setPersonalRecords }) => {
             'personal_records'
         );
 
-        // Update documents based on the updatedRecords array
         for (const updatedRecord of updatedRecords) {
             const { id, ...recordData } = updatedRecord;
             const personalRecordDocRef = id
                 ? doc(personalRecordsCollectionRef, id)
-                : doc(personalRecordsCollectionRef); // Creating a new document
+                : doc(personalRecordsCollectionRef);
 
             await setDoc(personalRecordDocRef, recordData);
         }
+    };
+
+    const handleSaveChanges = () => {
+        const updatedRecords = personalRecords.map((pr, index) => ({
+            ...pr,
+            ...editedRecords[index],
+        }));
+
+        setPersonalRecords(updatedRecords);
+        setEditedRecords([]);
+
+        saveChangesToDatabase(updatedRecords);
     };
 
     return (
@@ -59,88 +52,42 @@ const UpdatePRComponent = ({ personalRecords, setPersonalRecords }) => {
             {personalRecords &&
                 personalRecords.map((pr, index) => (
                     <View key={pr.id} style={styles.pr_container}>
-                        <Text style={styles.pr_label}>
-                            Press:
-                            <TextInput
-                                style={styles.pr_input}
-                                value={
-                                    editedRecords[index]?.press?.toString() ||
-                                    pr.press.toString()
-                                }
-                                onChangeText={(text) =>
-                                    handleInputChange(
-                                        index,
-                                        'press',
-                                        parseFloat(text) || 0
-                                    )
-                                }
-                            />
-                            lbs
-                        </Text>
-                        <Text style={styles.pr_label}>
-                            Squat:
-                            <TextInput
-                                style={styles.pr_input}
-                                value={
-                                    editedRecords[index]?.squat?.toString() ||
-                                    pr.squat.toString()
-                                }
-                                onChangeText={(text) =>
-                                    handleInputChange(
-                                        index,
-                                        'squat',
-                                        parseFloat(text) || 0
-                                    )
-                                }
-                            />
-                            lbs
-                        </Text>
-                        <Text style={styles.pr_label}>
-                            Deadlift:
-                            <TextInput
-                                style={styles.pr_input}
-                                value={
-                                    editedRecords[
-                                        index
-                                    ]?.deadlift?.toString() ||
-                                    pr.deadlift.toString()
-                                }
-                                onChangeText={(text) =>
-                                    handleInputChange(
-                                        index,
-                                        'deadlift',
-                                        parseFloat(text) || 0
-                                    )
-                                }
-                            />
-                            lbs
-                        </Text>
-                        <Text style={styles.pr_label}>
-                            Bench:
-                            <TextInput
-                                style={styles.pr_input}
-                                value={
-                                    editedRecords[index]?.bench?.toString() ||
-                                    pr.bench.toString()
-                                }
-                                onChangeText={(text) =>
-                                    handleInputChange(
-                                        index,
-                                        'bench',
-                                        parseFloat(text) || 0
-                                    )
-                                }
-                            />
-                            lbs
-                        </Text>
+                        {['press', 'squat', 'deadlift', 'bench'].map(
+                            (exercise) => (
+                                <View
+                                    style={styles.rowContainer}
+                                    key={exercise}
+                                >
+                                    <Text style={styles.pr_label}>
+                                        {exercise.charAt(0).toUpperCase() +
+                                            exercise.slice(1)}
+                                        :
+                                    </Text>
+                                    <TextInput
+                                        style={styles.pr_input}
+                                        value={
+                                            editedRecords[index]?.[
+                                                exercise
+                                            ]?.toString() ||
+                                            pr[exercise].toString()
+                                        }
+                                        onChangeText={(text) =>
+                                            handleInputChange(
+                                                index,
+                                                exercise,
+                                                parseFloat(text) || 0
+                                            )
+                                        }
+                                    />
+                                    <Text style={styles.unitLabel}>lbs</Text>
+                                </View>
+                            )
+                        )}
                     </View>
                 ))}
-            <TouchableOpacity
-                onPress={handleSaveChanges}
-                style={styles.save_button}
-            >
+            <Pressable onPress={handleSaveChanges} style={styles.save_button}>
                 <Text style={styles.save_button_text}>Save Changes</Text>
-            </TouchableOpacity>
+            </Pressable>
         </View>
     );
 };
@@ -166,12 +113,12 @@ const styles = StyleSheet.create({
     pr_input: {
         marginHorizontal: 5,
         fontSize: 24,
-        width: 40,
+        width: 50,
         color: '#fff',
         textAlign: 'center',
     },
     save_button: {
-        backgroundColor: '#FF0000',
+        backgroundColor: PRIMARY_COLOR,
         paddingVertical: 10,
         paddingHorizontal: 30,
         borderRadius: 5,
@@ -182,6 +129,16 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
         textAlign: 'center',
+    },
+    rowContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    unitLabel: {
+        fontSize: 24,
+        color: '#fff',
+        marginLeft: 5,
     },
 });
 
