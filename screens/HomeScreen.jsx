@@ -11,8 +11,6 @@ import WorkoutDayCard from '../components/WorkoutDayCard';
 
 import { PRIMARY_COLOR, BACKGROUND_APP_COLOR } from '../Color.js';
 
-import { local_workout } from '../Workout.js';
-
 const HomeScreen = () => {
     const screenWidth = Dimensions.get('window').width;
     const paddingHorizontal = screenWidth >= 600 ? 200 : 20;
@@ -26,20 +24,20 @@ const HomeScreen = () => {
         userDocRef,
         'personal_records'
     );
+    const workoutsCollectionRef = collection(db, 'workouts');
 
-    // TODO: GET WORKOUT FROM FIREBASE
-    useEffect(() => {
-        const fetchWorkout = async () => {
-            try {
-                const workoutData = local_workout;
-                setMyWorkout(workoutData);
-            } catch (error) {
-                console.error('Error fetching workout:', error);
-            }
-        };
+    // TODO: LOCAL WORKOUT FOR TESTING
+    // useEffect(() => {
+    //     const fetchWorkout = async () => {
+    //         try {
+    //             const workoutData = local_workout;
+    //         } catch (error) {
+    //             console.error('Error fetching workout:', error);
+    //         }
+    //     };
 
-        fetchWorkout();
-    }, []);
+    //     fetchWorkout();
+    // }, []);
 
     useFocusEffect(() => {
         const unsubscribePersonalRecords = onSnapshot(
@@ -53,13 +51,23 @@ const HomeScreen = () => {
             }
         );
 
+        const unsubscribeWorkouts = onSnapshot(
+            workoutsCollectionRef,
+            (snapshot) => {
+                const workoutsData = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                setMyWorkout(workoutsData);
+            }
+        );
+
         return () => {
-            // Unsubscribe the personalRecords listener
+            // Unsubscribe the listeners when the component is unmounted
             unsubscribePersonalRecords();
+            unsubscribeWorkouts();
         };
     });
-
-    console.log(myWorkout);
 
     const navigation = useNavigation();
 
@@ -85,6 +93,7 @@ const HomeScreen = () => {
                             week: 'Week 1',
                             day: 'Day 1',
                             personalRecords: personalRecords,
+                            workout: myWorkout,
                         })
                     }
                 />
