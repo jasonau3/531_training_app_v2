@@ -1,15 +1,16 @@
 import { StyleSheet, View, Dimensions } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 import { auth, db } from '../firebase';
-import { getDocs, collection, doc, onSnapshot } from 'firebase/firestore';
+import { getDocs, collection, doc } from 'firebase/firestore';
 
 import UpdatePRComponent from '../components/UpdatePRComponent';
 import WeekButton from '../components/WeekButton';
 import WorkoutDayCard from '../components/WorkoutDayCard';
 
-import { PRIMARY_COLOR, BACKGROUND_APP_COLOR } from '../Color.js';
+import { BACKGROUND_APP_COLOR } from '../Color.js';
+import PrimaryButton from '../components/PrimaryButton';
 
 const HomeScreen = () => {
     const screenWidth = Dimensions.get('window').width;
@@ -26,48 +27,34 @@ const HomeScreen = () => {
     );
     const workoutsCollectionRef = collection(db, 'workouts');
 
-    // TODO: LOCAL WORKOUT FOR TESTING
-    // useEffect(() => {
-    //     const fetchWorkout = async () => {
-    //         try {
-    //             const workoutData = local_workout;
-    //         } catch (error) {
-    //             console.error('Error fetching workout:', error);
-    //         }
-    //     };
-
-    //     fetchWorkout();
-    // }, []);
-
-    useFocusEffect(() => {
-        const unsubscribePersonalRecords = onSnapshot(
-            personalRecordsCollectionRef,
-            (snapshot) => {
-                const personalRecordsData = snapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }));
+    // Fetch data only when the component mounts
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            try {
+                const personalRecordsSnapshot = await getDocs(
+                    personalRecordsCollectionRef
+                );
+                const personalRecordsData = personalRecordsSnapshot.docs.map(
+                    (doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    })
+                );
                 setPersonalRecords(personalRecordsData);
-            }
-        );
 
-        const unsubscribeWorkouts = onSnapshot(
-            workoutsCollectionRef,
-            (snapshot) => {
-                const workoutsData = snapshot.docs.map((doc) => ({
+                const workoutsSnapshot = await getDocs(workoutsCollectionRef);
+                const workoutsData = workoutsSnapshot.docs.map((doc) => ({
                     id: doc.id,
                     ...doc.data(),
                 }));
                 setMyWorkout(workoutsData);
+            } catch (error) {
+                console.error('Error fetching data:', error);
             }
-        );
-
-        return () => {
-            // Unsubscribe the listeners when the component is unmounted
-            unsubscribePersonalRecords();
-            unsubscribeWorkouts();
         };
-    });
+
+        fetchInitialData();
+    }, []);
 
     const navigation = useNavigation();
 
@@ -81,7 +68,7 @@ const HomeScreen = () => {
                 />
                 <WeekButton
                     label={'Week 2'}
-                    onPress={() => console.log('Week 1')}
+                    onPress={() => console.log('Week 2')}
                     completed={false}
                 />
             </View>
@@ -97,20 +84,14 @@ const HomeScreen = () => {
                         })
                     }
                 />
-                <WorkoutDayCard
-                    label={'Day 2 - Squat'}
-                    onPress={() =>
-                        navigation.push('Workout', {
-                            week: 'Week 1',
-                            day: 'Day 2',
-                            personalRecords: personalRecords,
-                        })
-                    }
-                />
             </View>
             <UpdatePRComponent
                 personalRecords={personalRecords}
                 setPersonalRecords={setPersonalRecords}
+            />
+            <PrimaryButton
+                onPress={() => navigation.navigate('Program_editor')}
+                label={'Program Editor'}
             />
         </View>
     );

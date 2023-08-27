@@ -74,7 +74,7 @@ const LoginScreen = () => {
                 const userDocRef = doc(users, user.uid);
                 const workoutsCollectionRef = collection(
                     userDocRef,
-                    'workouts'
+                    'workout_history'
                 );
                 const personalRecordsCollectionRef = collection(
                     userDocRef,
@@ -84,7 +84,8 @@ const LoginScreen = () => {
                 // Add initial workout and personal records documents to subcollections
                 await addDoc(workoutsCollectionRef, {
                     title: 'My First Workout',
-                    date: new Date(),
+                    start: startTime,
+                    endTime: currentTime,
                 });
 
                 await addDoc(personalRecordsCollectionRef, {

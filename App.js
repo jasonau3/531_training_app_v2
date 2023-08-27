@@ -6,13 +6,19 @@ import Header from './components/Header';
 import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
 import WorkoutScreen from './screens/WorkoutScreen';
+import ProgramEditorScreen from './screens/ProgramEditorScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
     return (
         <NavigationContainer>
-            <Stack.Navigator>
+            <Stack.Navigator
+                screenOptions={{
+                    gestureEnabled: true,
+                    gestureDirection: 'horizontal',
+                }}
+            >
                 <Stack.Screen
                     name='Login'
                     component={LoginScreen}
@@ -28,6 +34,13 @@ export default function App() {
                 <Stack.Screen
                     name='Workout'
                     component={WorkoutScreen}
+                    options={{
+                        header: () => <Header showBackBtn={true} />, // Show custom header component
+                    }}
+                />
+                <Stack.Screen
+                    name='Program_editor'
+                    component={ProgramEditorScreen}
                     options={{
                         header: () => <Header showBackBtn={true} />, // Show custom header component
                     }}

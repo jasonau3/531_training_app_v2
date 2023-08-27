@@ -1,14 +1,18 @@
 import { StyleSheet, Text, View, Dimensions, Pressable } from 'react-native';
 import React, { useState, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
 
-import { PRIMARY_COLOR, BACKGROUND_APP_COLOR } from '../Color.js';
+import { collection, addDoc, doc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
+
+import { BACKGROUND_APP_COLOR } from '../Color.js';
 import ExerciseCard from '../components/ExerciseCard.jsx';
+import PrimaryButton from '../components/PrimaryButton';
 
 const WorkoutScreen = ({ route }) => {
     const { week, day, personalRecords, workout } = route.params;
-    const [isButtonPressed, setIsButtonPressed] = useState(false);
+
     const [startTime, setStartTime] = useState(null);
-    const [finishTime, setFinishTime] = useState(null);
 
     const screenWidth = Dimensions.get('window').width;
     const paddingHorizontal = screenWidth >= 600 ? 200 : 20;
@@ -16,43 +20,36 @@ const WorkoutScreen = ({ route }) => {
     const myPR = personalRecords[0];
     const myWorkout = workout[0];
 
-    const handlePressIn = () => {
-        setIsButtonPressed(true);
-    };
+    const users = collection(db, 'users');
+    const userDocRef = doc(users, auth.currentUser.uid);
+    const workoutsCollectionRef = collection(userDocRef, 'workout_history');
 
-    const handlePressOut = () => {
-        setIsButtonPressed(false);
-    };
+    const navigation = useNavigation();
 
-    const buttonStyles = [
-        styles.finish_button,
-        isButtonPressed && styles.finish_button_pressed,
-    ];
-
-    const handleComponentLoad = () => {
-        setStartTime(Date.now());
-    };
-
+    // on load, set start time
     useEffect(() => {
-        if (finishTime !== null && startTime !== null) {
-            console.log('Workout finished!');
-            // Calculate and log the elapsed time
-            const elapsedMilliseconds = finishTime - startTime;
-            console.log('Elapsed time:', elapsedMilliseconds, 'ms');
-        }
-    }, [finishTime, startTime]);
+        setStartTime(new Date());
+    }, []);
 
-    const handleWorkoutFinish = () => {
-        if (startTime) {
-            setFinishTime(Date.now());
+    // on finish, upload data to firebase workout history
+    const handleWorkoutFinish = async () => {
+        const currentTime = new Date();
+
+        try {
+            await addDoc(workoutsCollectionRef, {
+                title: myWorkout.mainExercise + ' - ' + week + ' - ' + day,
+                start: startTime,
+                endTime: currentTime,
+            });
+            console.log('Workout added to history');
+            navigation.goBack();
+        } catch {
+            console.error('Error adding workout to history');
         }
     };
 
     return (
-        <View
-            style={[styles.container, { paddingHorizontal }]}
-            onLoad={handleComponentLoad}
-        >
+        <View style={[styles.container, { paddingHorizontal }]}>
             <Text style={styles.subtitle}>
                 {week} - {day}
             </Text>
@@ -85,14 +82,7 @@ const WorkoutScreen = ({ route }) => {
                 />
             ))}
 
-            <Pressable
-                onPress={handleWorkoutFinish}
-                onPressIn={handlePressIn}
-                onPressOut={handlePressOut}
-                style={buttonStyles}
-            >
-                <Text style={styles.finish_button_text}>Finish</Text>
-            </Pressable>
+            <PrimaryButton onPress={handleWorkoutFinish} label={'Finish'} />
         </View>
     );
 };
@@ -111,21 +101,5 @@ const styles = StyleSheet.create({
     workout_heading: {
         fontSize: 20,
         marginVertical: 10,
-    },
-    finish_button: {
-        backgroundColor: PRIMARY_COLOR,
-        paddingVertical: 10,
-        paddingHorizontal: 30,
-        borderRadius: 5,
-        marginTop: 10,
-    },
-    finish_button_text: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 16,
-        textAlign: 'center',
-    },
-    finish_button_pressed: {
-        backgroundColor: PRIMARY_COLOR + '80',
     },
 });

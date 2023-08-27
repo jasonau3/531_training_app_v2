@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+
 import { collection, setDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+
 import { PRIMARY_COLOR } from '../Color.js';
+import PrimaryButton from './PrimaryButton';
 
 const UpdatePRComponent = ({ personalRecords, setPersonalRecords }) => {
     const [editedRecords, setEditedRecords] = useState([]);
@@ -85,9 +88,7 @@ const UpdatePRComponent = ({ personalRecords, setPersonalRecords }) => {
                         )}
                     </View>
                 ))}
-            <Pressable onPress={handleSaveChanges} style={styles.save_button}>
-                <Text style={styles.save_button_text}>Save Changes</Text>
-            </Pressable>
+            <PrimaryButton onPress={handleSaveChanges} label={'Save Changes'} />
         </View>
     );
 };
