@@ -2,36 +2,36 @@ import {
     StyleSheet,
     Text,
     View,
-    TextInput,
-    Button,
     FlatList,
     Dimensions,
+    Modal,
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { MaterialIcons } from '@expo/vector-icons';
 
 import { db } from '../firebase';
-import { addDoc, collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 
-import { BACKGROUND_APP_COLOR } from '../Color.js';
+import {
+    BACKGROUND_APP_COLOR,
+    sortByName,
+    calculateHorizontalPadding,
+} from '../Helpers.js';
 import WorkoutDayCard from '../components/WorkoutDayCard';
+import ProgramEditorFormComponent from '../components/ProgramEditorFormComponent';
+import PrimaryButton from '../components/PrimaryButton';
 
 const ProgramEditorScreen = () => {
     // State for all saved workouts
     const [workouts, setWorkouts] = useState([]);
-
-    // State for exercise details
-    const [week, setWeek] = useState('');
-    const [day, setDay] = useState('');
-    const [mainExercise, setMainExercise] = useState('');
-    const [sets, setSets] = useState('');
-    const [reps, setReps] = useState('');
-    const [percentage, setPercentage] = useState('');
+    const [currentWorkout, setCurrentWorkout] = useState([]);
+    const [modalOpen, setModalOpen] = useState(false);
 
     const workoutsCollectionRef = collection(db, 'workouts');
 
-    const screenWidth = Dimensions.get('window').width;
-    const paddingHorizontal = screenWidth >= 600 ? 200 : 20;
+    const isWideScreen = Dimensions.get('window').width >= 700;
+    const paddingHorizontal = calculateHorizontalPadding(
+        Dimensions.get('window').width
+    );
 
     useEffect(() => {
         const fetchWorkouts = async () => {
@@ -41,118 +41,59 @@ const ProgramEditorScreen = () => {
                     id: doc.id,
                     ...doc.data(),
                 }));
-                setWorkouts(workoutsData);
+                const sortedData = sortByName(workoutsData);
+                setWorkouts(sortedData);
             } catch (error) {
                 console.error('Error fetching workouts:', error);
             }
         };
 
         fetchWorkouts();
-    }, []);
+    }, [modalOpen]);
 
-    const handleAddWorkout = async () => {
-        if (mainExercise.trim() !== '') {
-            try {
-                const newWorkout = {
-                    id: 'test',
-                    week: 2,
-                    day: 1,
-                    mainExercise: mainExercise,
-                    mainSets: mainSets,
-                    accessories: accessories,
-                };
-
-                // Add the new workout object to the Firestore collection
-                await addDoc(workoutsCollectionRef, newWorkout);
-
-                // TODO: Reset input fields
-            } catch (error) {
-                console.error('Error adding workout:', error);
-            }
-        }
-    };
+    console.log(workouts);
 
     return (
         <View style={[styles.container, { paddingHorizontal }]}>
             <Text style={styles.title}>5/3/1 Program Editor</Text>
 
-            <TextInput
-                style={styles.input}
-                placeholder='Week'
-                value={week}
-                onChangeText={setWeek}
-                keyboardType='numeric'
-            />
-            <TextInput
-                style={styles.input}
-                placeholder='Day'
-                value={day}
-                onChangeText={setDay}
-                keyboardType='numeric'
-            />
-
-            <Text>Main set</Text>
-            <TextInput
-                style={styles.input}
-                placeholder='Main Exercise'
-                value={mainExercise}
-                onChangeText={setMainExercise}
-            />
-
-            <Text>First set</Text>
-
-            <TextInput
-                style={styles.input}
-                placeholder='Sets'
-                value={sets}
-                onChangeText={setSets}
-                keyboardType='numeric'
-            />
-            <TextInput
-                style={styles.input}
-                placeholder='Reps'
-                value={reps}
-                onChangeText={setReps}
-                keyboardType='numeric'
-            />
-            <TextInput
-                style={styles.input}
-                placeholder='Percentage'
-                value={percentage}
-                onChangeText={setPercentage}
-                keyboardType='numeric'
-            />
-
-            <Text>Accessories</Text>
-            <TextInput
-                style={styles.input}
-                placeholder='First accessory name'
-                value={percentage}
-                onChangeText={setPercentage}
-                keyboardType='numeric'
-            />
-            <TextInput
-                style={styles.input}
-                placeholder='First accessory reps'
-                value={percentage}
-                onChangeText={setPercentage}
-                keyboardType='numeric'
-            />
-
-            <Button title='Add Workout' onPress={handleAddWorkout} />
             <FlatList
                 data={workouts}
                 renderItem={({ item }) => (
                     <>
                         <WorkoutDayCard
                             label={`Week ${item.week} - day ${item.day} - ${item.mainExercise}`}
-                            onPress={() => console.log('TODO EDIT WORKOUT')}
+                            onPress={() => {
+                                setModalOpen(true);
+                                setCurrentWorkout(item);
+                            }}
                         />
-                        <MaterialIcons name='edit' size={20} color='#333' />
                     </>
                 )}
                 keyExtractor={(item) => item.id}
             />
+            <PrimaryButton
+                label='Add new workout'
+                onPress={() => {
+                    setModalOpen(true);
+                    setCurrentWorkout(null);
+                }}
+            />
+
+            <Modal
+                visible={modalOpen}
+                animationType='fade'
+                animationConfig={{ duration: 100 }}
+                transparent={true}
+            >
+                <ProgramEditorFormComponent
+                    isWideScreen={isWideScreen}
+                    setModalOpen={setModalOpen}
+                    currentWorkout={currentWorkout}
+                    workoutsCollectionRef={workoutsCollectionRef}
+                    documentRef={currentWorkout?.id}
+                />
+            </Modal>
         </View>
     );
 };
@@ -168,10 +109,8 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 20,
     },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
+    subtitle: {
+        fontSize: 18,
         marginBottom: 10,
     },
 });

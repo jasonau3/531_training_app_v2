@@ -4,7 +4,7 @@ import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { collection, setDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 
-import { PRIMARY_COLOR } from '../Color.js';
+import { PRIMARY_COLOR } from '../Helpers.js';
 import PrimaryButton from './PrimaryButton';
 
 const UpdatePRComponent = ({ personalRecords, setPersonalRecords }) => {
@@ -50,7 +50,7 @@ const UpdatePRComponent = ({ personalRecords, setPersonalRecords }) => {
     };
 
     return (
-        <View>
+        <View style={styles.container}>
             <Text style={styles.heading}>Update PRs</Text>
             {personalRecords &&
                 personalRecords.map((pr, index) => (
@@ -94,6 +94,7 @@ const UpdatePRComponent = ({ personalRecords, setPersonalRecords }) => {
 };
 
 const styles = StyleSheet.create({
+    container: { flex: 1, marginTop: 10 },
     heading: {
         paddingLeft: 5,
         paddingBottom: 5,

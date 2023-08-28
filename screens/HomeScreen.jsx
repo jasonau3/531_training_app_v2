@@ -1,23 +1,37 @@
-import { StyleSheet, View, Dimensions } from 'react-native';
+import { StyleSheet, View, Dimensions, ScrollView } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 
 import { auth, db } from '../firebase';
-import { getDocs, collection, doc } from 'firebase/firestore';
+import {
+    getDocs,
+    collection,
+    doc,
+    query,
+    orderBy,
+    limit,
+} from 'firebase/firestore';
 
 import UpdatePRComponent from '../components/UpdatePRComponent';
 import WeekButton from '../components/WeekButton';
 import WorkoutDayCard from '../components/WorkoutDayCard';
-
-import { BACKGROUND_APP_COLOR } from '../Color.js';
+import {
+    BACKGROUND_APP_COLOR,
+    sortByName,
+    getRecentWorkoutWeek,
+    calculateHorizontalPadding,
+} from '../Helpers.js';
 import PrimaryButton from '../components/PrimaryButton';
 
 const HomeScreen = () => {
-    const screenWidth = Dimensions.get('window').width;
-    const paddingHorizontal = screenWidth >= 600 ? 200 : 20;
-
     const [personalRecords, setPersonalRecords] = useState(null);
     const [myWorkout, setMyWorkout] = useState(null);
+    const [currentWeek, setCurrentWeek] = useState(1);
+
+    const paddingHorizontal = calculateHorizontalPadding(
+        Dimensions.get('window').width
+    );
 
     const usersCollectionRef = collection(db, 'users');
     const userDocRef = doc(usersCollectionRef, auth.currentUser.uid);
@@ -25,12 +39,20 @@ const HomeScreen = () => {
         userDocRef,
         'personal_records'
     );
+    const workoutHistoryCollectionRef = collection(
+        userDocRef,
+        'workout_history'
+    );
     const workoutsCollectionRef = collection(db, 'workouts');
+
+    const navigation = useNavigation();
+    const isFocused = useIsFocused();
 
     // Fetch data only when the component mounts
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
+                // get personal records data
                 const personalRecordsSnapshot = await getDocs(
                     personalRecordsCollectionRef
                 );
@@ -42,57 +64,96 @@ const HomeScreen = () => {
                 );
                 setPersonalRecords(personalRecordsData);
 
+                // get workout data
                 const workoutsSnapshot = await getDocs(workoutsCollectionRef);
                 const workoutsData = workoutsSnapshot.docs.map((doc) => ({
                     id: doc.id,
                     ...doc.data(),
                 }));
-                setMyWorkout(workoutsData);
+                const sortedData = sortByName(workoutsData);
+                setMyWorkout(sortedData);
+
+                // get most recent workout and set the current week to that week
+                const q = query(
+                    workoutHistoryCollectionRef,
+                    orderBy('startTime', 'desc'),
+                    limit(1)
+                );
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    const latestWorkout = querySnapshot.docs[0].data();
+                    const titleParts = latestWorkout.title.split(' - ');
+                    const result = getRecentWorkoutWeek(
+                        parseInt(titleParts[1]),
+                        parseInt(titleParts[2])
+                    );
+                    setCurrentWeek(result);
+                } else {
+                    setCurrentWeek(1); // default to week 1 if no workouts have been done yet
+                }
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         };
 
         fetchInitialData();
-    }, []);
-
-    const navigation = useNavigation();
+    }, [isFocused]);
 
     return (
         <View style={[styles.container, { paddingHorizontal }]}>
-            <View style={styles.week_btns}>
-                <WeekButton
-                    label={'Week 1'}
-                    onPress={() => console.log('Week 1')}
-                    isCompleted={true}
+            <ScrollView>
+                <View style={styles.week_btns}>
+                    <ScrollView horizontal={true}>
+                        {[1, 2, 3, 4].map((week) => {
+                            return (
+                                <WeekButton
+                                    label={`Week ${week}`}
+                                    onPress={() => setCurrentWeek(week)}
+                                    isCompleted={currentWeek === week}
+                                    key={week}
+                                />
+                            );
+                        })}
+                    </ScrollView>
+                </View>
+
+                <View style={styles.day_btns}>
+                    {myWorkout &&
+                        myWorkout
+                            .filter((workout) => workout.week === currentWeek)
+                            .map((workout) => {
+                                return (
+                                    <WorkoutDayCard
+                                        label={`Day ${workout.day} - ${
+                                            workout.mainExercise
+                                                .charAt(0)
+                                                .toUpperCase() +
+                                            workout.mainExercise.slice(1)
+                                        }`}
+                                        onPress={() =>
+                                            navigation.push('Workout', {
+                                                week: workout.week,
+                                                day: workout.day,
+                                                personalRecords:
+                                                    personalRecords,
+                                                workout: workout,
+                                            })
+                                        }
+                                        key={workout.id}
+                                    />
+                                );
+                            })}
+                </View>
+                <UpdatePRComponent
+                    personalRecords={personalRecords}
+                    setPersonalRecords={setPersonalRecords}
                 />
-                <WeekButton
-                    label={'Week 2'}
-                    onPress={() => console.log('Week 2')}
-                    completed={false}
+                <PrimaryButton
+                    onPress={() => navigation.navigate('Program_editor')}
+                    label={'Program Editor'}
                 />
-            </View>
-            <View>
-                <WorkoutDayCard
-                    label={'Day 1 - Press'}
-                    onPress={() =>
-                        navigation.push('Workout', {
-                            week: 'Week 1',
-                            day: 'Day 1',
-                            personalRecords: personalRecords,
-                            workout: myWorkout,
-                        })
-                    }
-                />
-            </View>
-            <UpdatePRComponent
-                personalRecords={personalRecords}
-                setPersonalRecords={setPersonalRecords}
-            />
-            <PrimaryButton
-                onPress={() => navigation.navigate('Program_editor')}
-                label={'Program Editor'}
-            />
+            </ScrollView>
         </View>
     );
 };
@@ -106,14 +167,10 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     week_btns: {
+        flex: 0.3,
         flexDirection: 'row',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        gap: 10,
     },
     day_btns: {
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
+        flex: 1,
     },
 });

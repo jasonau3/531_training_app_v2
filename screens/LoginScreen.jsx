@@ -18,7 +18,7 @@ import {
     signInWithPopup,
 } from 'firebase/auth';
 
-import { PRIMARY_COLOR } from '../Color.js';
+import { PRIMARY_COLOR } from '../Helpers.js';
 
 const LoginScreen = () => {
     const [email, setEmail] = useState('');

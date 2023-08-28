@@ -5,7 +5,10 @@ import { useNavigation } from '@react-navigation/native';
 import { collection, addDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 
-import { BACKGROUND_APP_COLOR } from '../Color.js';
+import {
+    BACKGROUND_APP_COLOR,
+    calculateHorizontalPadding,
+} from '../Helpers.js';
 import ExerciseCard from '../components/ExerciseCard.jsx';
 import PrimaryButton from '../components/PrimaryButton';
 
@@ -14,11 +17,11 @@ const WorkoutScreen = ({ route }) => {
 
     const [startTime, setStartTime] = useState(null);
 
-    const screenWidth = Dimensions.get('window').width;
-    const paddingHorizontal = screenWidth >= 600 ? 200 : 20;
+    const paddingHorizontal = calculateHorizontalPadding(
+        Dimensions.get('window').width
+    );
 
     const myPR = personalRecords[0];
-    const myWorkout = workout[0];
 
     const users = collection(db, 'users');
     const userDocRef = doc(users, auth.currentUser.uid);
@@ -37,8 +40,8 @@ const WorkoutScreen = ({ route }) => {
 
         try {
             await addDoc(workoutsCollectionRef, {
-                title: myWorkout.mainExercise + ' - ' + week + ' - ' + day,
-                start: startTime,
+                title: workout.mainExercise + ' - ' + week + ' - ' + day,
+                startTime: startTime,
                 endTime: currentTime,
             });
             console.log('Workout added to history');
@@ -51,27 +54,27 @@ const WorkoutScreen = ({ route }) => {
     return (
         <View style={[styles.container, { paddingHorizontal }]}>
             <Text style={styles.subtitle}>
-                {week} - {day}
+                Week {week} - day {day}
             </Text>
             <Text style={styles.workout_heading}>Main Set</Text>
-            {workout[0].mainSets.map((curSet, index) => (
+            {workout.mainSets.map((curSet, index) => (
                 <ExerciseCard
                     key={index}
-                    name={myWorkout.mainExercise}
+                    name={workout.mainExercise}
                     isMainSet={true}
                     sets={curSet.sets}
                     reps={curSet.reps}
                     weight={
                         Math.round(
                             ((curSet.percentage / 100) *
-                                (myPR[myWorkout.mainExercise] * 0.9)) /
+                                (myPR[workout.mainExercise] * 0.9)) /
                                 1.25
                         ) * 1.25
                     } // rounds to the nearest 1.25lb
                 />
             ))}
             <Text style={styles.workout_heading}>Accessories</Text>
-            {workout[0].accessories.map((curSet, index) => (
+            {workout.accessories.map((curSet, index) => (
                 <ExerciseCard
                     key={index}
                     name={curSet.exercise}

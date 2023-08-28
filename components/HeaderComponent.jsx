@@ -13,15 +13,20 @@ import { useNavigation } from '@react-navigation/native';
 
 import { auth } from '../firebase';
 
-import { PRIMARY_COLOR, BACKGROUND_APP_COLOR } from '../Color.js';
+import {
+    PRIMARY_COLOR,
+    BACKGROUND_APP_COLOR,
+    calculateHorizontalPadding,
+} from '../Helpers.js';
 
-const Header = ({ showBackBtn }) => {
+const HeaderComponent = ({ showBackBtn }) => {
     const [modalOpen, setModalOpen] = useState(false);
 
-    const navigation = useNavigation();
+    const paddingHorizontal = calculateHorizontalPadding(
+        Dimensions.get('window').width
+    );
 
-    const screenWidth = Dimensions.get('window').width;
-    const paddingHorizontal = screenWidth >= 600 ? 200 : 20;
+    const navigation = useNavigation();
 
     const handleBackPress = () => {
         navigation.goBack();
@@ -89,7 +94,7 @@ const Header = ({ showBackBtn }) => {
     );
 };
 
-export default Header;
+export default HeaderComponent;
 
 const styles = StyleSheet.create({
     heading: {

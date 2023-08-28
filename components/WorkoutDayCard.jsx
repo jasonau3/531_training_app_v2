@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 
-import { PRIMARY_COLOR } from '../Color.js';
+import { PRIMARY_COLOR } from '../Helpers.js';
 
 const WorkoutDayCard = ({ label, onPress }) => {
     const [isPressed, setIsPressed] = useState(false);

@@ -1,7 +1,7 @@
 import { StyleSheet, Text, Pressable } from 'react-native';
 import React, { useState } from 'react';
 
-import { PRIMARY_COLOR } from '../Color.js';
+import { PRIMARY_COLOR } from '../Helpers.js';
 
 const PrimaryButton = ({ onPress, label }) => {
     const [isButtonPressed, setIsButtonPressed] = useState(false);
@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 30,
         borderRadius: 5,
         marginTop: 10,
+        marginBottom: 10,
     },
     primary_button_text: {
         color: '#fff',
