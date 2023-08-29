@@ -4,9 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import HeaderComponent from './components/HeaderComponent';
 import LoginScreen from './screens/LoginScreen';
-import HomeScreen from './screens/HomeScreen';
+import TabScreen from './screens/TabScreen';
 import WorkoutScreen from './screens/WorkoutScreen';
-import ProgramEditorScreen from './screens/ProgramEditorScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,24 +24,17 @@ export default function App() {
                     options={{ headerShown: false }}
                 />
                 <Stack.Screen
-                    name='Home'
-                    component={HomeScreen}
+                    name='5/3/1 Home'
+                    component={TabScreen}
                     options={{
-                        header: () => <HeaderComponent />, // Show custom header component
+                        header: () => <HeaderComponent />,
                     }}
                 />
                 <Stack.Screen
                     name='Workout'
                     component={WorkoutScreen}
                     options={{
-                        header: () => <HeaderComponent showBackBtn={true} />, // Show custom header component
-                    }}
-                />
-                <Stack.Screen
-                    name='Program_editor'
-                    component={ProgramEditorScreen}
-                    options={{
-                        header: () => <HeaderComponent showBackBtn={true} />, // Show custom header component
+                        header: () => <HeaderComponent showBackBtn={true} />,
                     }}
                 />
             </Stack.Navigator>

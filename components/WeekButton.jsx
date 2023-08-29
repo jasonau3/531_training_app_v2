@@ -45,6 +45,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 10,
         marginBottom: 15,
+        marginRight: 10,
     },
     containerPressed: {
         backgroundColor: '#C2C2C2',

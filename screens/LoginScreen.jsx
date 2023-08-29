@@ -31,7 +31,7 @@ const LoginScreen = () => {
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
-                navigation.navigate('Home');
+                navigation.navigate('5/3/1 Home');
             }
         });
 

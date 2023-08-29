@@ -12,6 +12,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { doc, addDoc, updateDoc } from 'firebase/firestore';
 
 import PrimaryButton from './PrimaryButton.jsx';
+import ExerciseForm from './ExerciseForm';
 
 const ProgramEditorFormComponent = ({
     isWideScreen,

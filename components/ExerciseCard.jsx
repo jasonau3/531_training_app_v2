@@ -1,17 +1,25 @@
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Modal } from 'react-native';
 import React, { useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 
-const ExerciseCard = ({ name, isMainSet, sets, reps, weight }) => {
-    const [iconColor, setIconColor] = useState('#333'); // Default color
+const ExerciseCard = ({
+    name,
+    isMainSet,
+    sets,
+    reps,
+    weight,
+    setModalOpen,
+}) => {
+    const [iconColor, setIconColor] = useState('#333');
 
     const handleEllipsisPress = () => {
-        // TODO: Add functionality to the ellipsis
-
-        setIconColor('#858383'); // Brighter color
+        setIconColor('#858383');
         setTimeout(() => {
-            setIconColor('#333'); // Restore the default color after a delay
+            setIconColor('#333');
         }, 300);
+
+        // open modal
+        setModalOpen(true);
     };
 
     if (isMainSet) {
@@ -25,7 +33,7 @@ const ExerciseCard = ({ name, isMainSet, sets, reps, weight }) => {
                         <MaterialIcons
                             name='more-vert'
                             size={18}
-                            color={iconColor} // Use the dynamic color
+                            color={iconColor}
                         />
                     </Pressable>
                 </View>
@@ -58,7 +66,7 @@ const ExerciseCard = ({ name, isMainSet, sets, reps, weight }) => {
                     <MaterialIcons
                         name='more-vert'
                         size={18}
-                        color={iconColor} // Use the dynamic color
+                        color={iconColor}
                     />
                 </Pressable>
             </View>

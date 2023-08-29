@@ -22,16 +22,15 @@ import {
     getRecentWorkoutWeek,
     calculateHorizontalPadding,
 } from '../Helpers.js';
-import PrimaryButton from '../components/PrimaryButton';
 
-const HomeScreen = () => {
-    const [personalRecords, setPersonalRecords] = useState(null);
-    const [myWorkout, setMyWorkout] = useState(null);
-    const [currentWeek, setCurrentWeek] = useState(1);
-
+const HomeTabScreen = () => {
     const paddingHorizontal = calculateHorizontalPadding(
         Dimensions.get('window').width
     );
+
+    const [personalRecords, setPersonalRecords] = useState(null);
+    const [myWorkout, setMyWorkout] = useState(null);
+    const [currentWeek, setCurrentWeek] = useState(1);
 
     const usersCollectionRef = collection(db, 'users');
     const userDocRef = doc(usersCollectionRef, auth.currentUser.uid);
@@ -149,16 +148,12 @@ const HomeScreen = () => {
                     personalRecords={personalRecords}
                     setPersonalRecords={setPersonalRecords}
                 />
-                <PrimaryButton
-                    onPress={() => navigation.navigate('Program_editor')}
-                    label={'Program Editor'}
-                />
             </ScrollView>
         </View>
     );
 };
 
-export default HomeScreen;
+export default HomeTabScreen;
 
 const styles = StyleSheet.create({
     container: {
@@ -167,7 +162,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     week_btns: {
-        flex: 0.3,
+        flex: 0.2,
         flexDirection: 'row',
     },
     day_btns: {

@@ -1,6 +1,14 @@
-import { StyleSheet, Text, View, Dimensions, Pressable } from 'react-native';
+import {
+    StyleSheet,
+    Text,
+    View,
+    Dimensions,
+    Pressable,
+    Modal,
+} from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import { collection, addDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
@@ -11,9 +19,11 @@ import {
 } from '../Helpers.js';
 import ExerciseCard from '../components/ExerciseCard.jsx';
 import PrimaryButton from '../components/PrimaryButton';
+import ExerciseForm from '../components/ExerciseForm';
 
 const WorkoutScreen = ({ route }) => {
     const { week, day, personalRecords, workout } = route.params;
+    const [modalOpen, setModalOpen] = useState(false);
 
     const [startTime, setStartTime] = useState(null);
 
@@ -71,6 +81,7 @@ const WorkoutScreen = ({ route }) => {
                                 1.25
                         ) * 1.25
                     } // rounds to the nearest 1.25lb
+                    setModalOpen={setModalOpen}
                 />
             ))}
             <Text style={styles.workout_heading}>Accessories</Text>
@@ -82,8 +93,34 @@ const WorkoutScreen = ({ route }) => {
                     sets={null}
                     reps={curSet.reps}
                     weight={null}
+                    setModalOpen={setModalOpen}
                 />
             ))}
+
+            <Modal
+                visible={modalOpen}
+                animationType='slide'
+                animationConfig={{ duration: 100 }}
+                transparent={true}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalBox}>
+                        <MaterialIcons
+                            name='close'
+                            size={24}
+                            onPress={() => setModalOpen(false)}
+                            style={styles.modalClose}
+                        />
+
+                        <ExerciseForm />
+
+                        <PrimaryButton
+                            label='Save exercise'
+                            onPress={() => setModalOpen(false)}
+                        />
+                    </View>
+                </View>
+            </Modal>
 
             <PrimaryButton onPress={handleWorkoutFinish} label={'Finish'} />
         </View>
@@ -104,5 +141,27 @@ const styles = StyleSheet.create({
     workout_heading: {
         fontSize: 20,
         marginVertical: 10,
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    },
+    modalBox: {
+        alignSelf: 'center',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        width: '80%',
+    },
+    modalClose: {
+        alignSelf: 'flex-start',
+        color: 'gray',
+    },
+    modalText: {
+        color: 'black',
+        fontSize: 18,
+        textAlign: 'center',
+        marginBottom: 20,
     },
 });
