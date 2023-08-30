@@ -4,8 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import HeaderComponent from './components/HeaderComponent';
 import LoginScreen from './screens/LoginScreen';
-import TabScreen from './screens/TabScreen';
-import WorkoutScreen from './screens/WorkoutScreen';
+import HomeScreen from './screens/HomeScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,16 +24,9 @@ export default function App() {
                 />
                 <Stack.Screen
                     name='5/3/1 Home'
-                    component={TabScreen}
+                    component={HomeScreen}
                     options={{
-                        header: () => <HeaderComponent />,
-                    }}
-                />
-                <Stack.Screen
-                    name='Workout'
-                    component={WorkoutScreen}
-                    options={{
-                        header: () => <HeaderComponent showBackBtn={true} />,
+                        headerShown: false,
                     }}
                 />
             </Stack.Navigator>

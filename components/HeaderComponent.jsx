@@ -35,7 +35,7 @@ const HeaderComponent = ({ showBackBtn }) => {
     const handleSignOut = async () => {
         auth.signOut()
             .then(() => {
-                navigation.replace('Login');
+                navigation.navigate('Login');
             })
             .catch((error) => {
                 console.log(error);
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         backgroundColor: BACKGROUND_APP_COLOR,
-        paddingVertical: 20,
+        paddingTop: 30,
     },
     profileButton: {
         marginLeft: 'auto',

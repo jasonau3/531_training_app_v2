@@ -123,6 +123,7 @@ const LoginScreen = () => {
 
     return (
         <KeyboardAvoidingView style={styles.container} behavior='padding'>
+            <Text style={styles.title}>5/3/1 Training App</Text>
             <View style={styles.inputContainer}>
                 <TextInput
                     placeholder='Email'
@@ -175,6 +176,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    title: { fontSize: 38, fontWeight: '700', marginBottom: 20 },
     inputContainer: {
         width: '70%',
     },

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, FlatList } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useIsFocused } from '@react-navigation/native';
 
@@ -10,7 +10,6 @@ import {
     sortByTime,
     calculateHorizontalPadding,
 } from '../Helpers.js';
-import { FlatList } from 'react-native-web';
 
 const JournalTabScreen = () => {
     const isFocused = useIsFocused();

@@ -3,8 +3,8 @@ import {
     Text,
     View,
     Dimensions,
-    Pressable,
     Modal,
+    ScrollView,
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
@@ -63,39 +63,41 @@ const WorkoutScreen = ({ route }) => {
 
     return (
         <View style={[styles.container, { paddingHorizontal }]}>
-            <Text style={styles.subtitle}>
-                Week {week} - day {day}
-            </Text>
-            <Text style={styles.workout_heading}>Main Set</Text>
-            {workout.mainSets.map((curSet, index) => (
-                <ExerciseCard
-                    key={index}
-                    name={workout.mainExercise}
-                    isMainSet={true}
-                    sets={curSet.sets}
-                    reps={curSet.reps}
-                    weight={
-                        Math.round(
-                            ((curSet.percentage / 100) *
-                                (myPR[workout.mainExercise] * 0.9)) /
-                                1.25
-                        ) * 1.25
-                    } // rounds to the nearest 1.25lb
-                    setModalOpen={setModalOpen}
-                />
-            ))}
-            <Text style={styles.workout_heading}>Accessories</Text>
-            {workout.accessories.map((curSet, index) => (
-                <ExerciseCard
-                    key={index}
-                    name={curSet.exercise}
-                    isMainSet={false}
-                    sets={null}
-                    reps={curSet.reps}
-                    weight={null}
-                    setModalOpen={setModalOpen}
-                />
-            ))}
+            <ScrollView>
+                <Text style={styles.subtitle}>
+                    Week {week} - day {day}
+                </Text>
+                <Text style={styles.workout_heading}>Main Set</Text>
+                {workout.mainSets.map((curSet, index) => (
+                    <ExerciseCard
+                        key={index}
+                        name={workout.mainExercise}
+                        isMainSet={true}
+                        sets={curSet.sets}
+                        reps={curSet.reps}
+                        weight={
+                            Math.round(
+                                ((curSet.percentage / 100) *
+                                    (myPR[workout.mainExercise] * 0.9)) /
+                                    1.25
+                            ) * 1.25
+                        } // rounds to the nearest 1.25lb
+                        setModalOpen={setModalOpen}
+                    />
+                ))}
+                <Text style={styles.workout_heading}>Accessories</Text>
+                {workout.accessories.map((curSet, index) => (
+                    <ExerciseCard
+                        key={index}
+                        name={curSet.exercise}
+                        isMainSet={false}
+                        sets={null}
+                        reps={curSet.reps}
+                        weight={null}
+                        setModalOpen={setModalOpen}
+                    />
+                ))}
+            </ScrollView>
 
             <Modal
                 visible={modalOpen}

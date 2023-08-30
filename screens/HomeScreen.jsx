@@ -1,7 +1,10 @@
 import { StyleSheet, View, Dimensions, ScrollView } from 'react-native';
 import React, { useEffect, useState } from 'react';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { auth, db } from '../firebase';
 import {
@@ -13,6 +16,11 @@ import {
     limit,
 } from 'firebase/firestore';
 
+import JournalTabScreen from './JournalTabScreen.jsx';
+import ProgramTabScreen from './ProgramTabScreen.jsx';
+import WorkoutScreen from './WorkoutScreen.jsx';
+
+import HeaderComponent from '../components/HeaderComponent';
 import UpdatePRComponent from '../components/UpdatePRComponent';
 import WeekButton from '../components/WeekButton';
 import WorkoutDayCard from '../components/WorkoutDayCard';
@@ -23,7 +31,10 @@ import {
     calculateHorizontalPadding,
 } from '../Helpers.js';
 
-const HomeTabScreen = () => {
+const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+
+const HomeContent = () => {
     const paddingHorizontal = calculateHorizontalPadding(
         Dimensions.get('window').width
     );
@@ -73,12 +84,12 @@ const HomeTabScreen = () => {
                 setMyWorkout(sortedData);
 
                 // get most recent workout and set the current week to that week
-                const q = query(
+                const recentWorkoutQuery = query(
                     workoutHistoryCollectionRef,
                     orderBy('startTime', 'desc'),
                     limit(1)
                 );
-                const querySnapshot = await getDocs(q);
+                const querySnapshot = await getDocs(recentWorkoutQuery);
 
                 if (!querySnapshot.empty) {
                     const latestWorkout = querySnapshot.docs[0].data();
@@ -153,13 +164,85 @@ const HomeTabScreen = () => {
     );
 };
 
-export default HomeTabScreen;
+const HomeTab = () => {
+    return (
+        <Stack.Navigator>
+            <Stack.Screen
+                name='Home Content'
+                component={HomeContent}
+                options={{ header: () => <HeaderComponent /> }}
+            />
+            <Stack.Screen
+                name='Workout'
+                component={WorkoutScreen}
+                options={{
+                    header: () => <HeaderComponent showBackBtn={true} />,
+                }}
+            />
+        </Stack.Navigator>
+    );
+};
+
+const TabScreen = () => {
+    return (
+        <Tab.Navigator
+            screenOptions={{
+                tabBarActiveTintColor: 'red',
+                tabStyle: {
+                    fontWeight: 'bold',
+                },
+                labelStyle: {
+                    fontSize: 16,
+                },
+            }}
+        >
+            <Tab.Screen
+                name='Home'
+                component={HomeTab}
+                options={{
+                    headerShown: false,
+                    tabBarLabel: 'Home',
+                    tabBarIcon: ({ color, size }) => (
+                        <MaterialIcons name='home' color={color} size={size} />
+                    ),
+                    tabBarLabelPosition: 'below-icon',
+                }}
+            />
+            <Tab.Screen
+                name='Program'
+                component={ProgramTabScreen}
+                options={{
+                    header: () => <HeaderComponent />,
+                    tabBarLabel: 'Program',
+                    tabBarIcon: ({ color, size }) => (
+                        <FontAwesome5 name='dumbbell' color={color} size={18} />
+                    ),
+                    tabBarLabelPosition: 'below-icon',
+                }}
+            />
+            <Tab.Screen
+                name='Journal'
+                component={JournalTabScreen}
+                options={{
+                    header: () => <HeaderComponent />,
+                    tabBarLabel: 'Journal',
+                    tabBarIcon: ({ color, size }) => (
+                        <MaterialIcons name='book' color={color} size={size} />
+                    ),
+                    tabBarLabelPosition: 'below-icon',
+                }}
+            />
+        </Tab.Navigator>
+    );
+};
+
+export default TabScreen;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: BACKGROUND_APP_COLOR,
-        paddingVertical: 10,
+        paddingVertical: 20,
     },
     week_btns: {
         flex: 0.2,

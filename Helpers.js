@@ -15,9 +15,9 @@ export const sortByTime = (array) => {
 
 export const calculateHorizontalPadding = (screenWidth) => {
     if (screenWidth > 1024) {
-        return screenWidth * 0.3;
+        return screenWidth * 0.1;
     } else if (screenWidth > 768) {
-        return screenWidth * 0.2;
+        return screenWidth * 0.05;
     } else {
         return screenWidth * 0.05;
     }
