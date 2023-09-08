@@ -1,83 +1,76 @@
-import {
-    StyleSheet,
-    Text,
-    View,
-    FlatList,
-    Dimensions,
-    Modal,
-} from 'react-native';
+import { StyleSheet, Text, View, Dimensions, Modal } from 'react-native';
 import React, { useState, useEffect } from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
 
 import { db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 
+import WorkoutEditorScreen from './WorkoutEditorScreen';
 import {
     BACKGROUND_APP_COLOR,
-    sortByName,
     calculateHorizontalPadding,
 } from '../Helpers.js';
-import WorkoutDayCard from '../components/WorkoutDayCard';
-import ProgramEditorFormComponent from '../components/ProgramEditorFormComponent';
+import HeaderComponent from '../components/HeaderComponent';
 import PrimaryButton from '../components/PrimaryButton';
+import ProgramCard from '../components/ProgramCard';
+import ProgramEditorFormComponent from '../components/ProgramEditorFormComponent';
+
+const Stack = createNativeStackNavigator();
 
 const ProgramEditorScreen = () => {
-    // State for all saved workouts
-    const [workouts, setWorkouts] = useState([]);
-    const [currentWorkout, setCurrentWorkout] = useState([]);
+    const [programs, setPrograms] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
 
-    const workoutsCollectionRef = collection(db, 'workouts');
+    const programCollectionsRef = collection(db, 'programs');
 
-    const isWideScreen = Dimensions.get('window').width >= 700;
     const paddingHorizontal = calculateHorizontalPadding(
         Dimensions.get('window').width
     );
 
     useEffect(() => {
-        const fetchWorkouts = async () => {
+        const fetchPrograms = async () => {
             try {
-                const workoutsSnapshot = await getDocs(workoutsCollectionRef);
-                const workoutsData = workoutsSnapshot.docs.map((doc) => ({
+                const programsSnapshot = await getDocs(programCollectionsRef);
+                var programsData = programsSnapshot.docs.map((doc) => ({
                     id: doc.id,
                     ...doc.data(),
                 }));
-                const sortedData = sortByName(workoutsData);
-                setWorkouts(sortedData);
+
+                setPrograms(programsData);
             } catch (error) {
                 console.error('Error fetching workouts:', error);
             }
         };
 
-        fetchWorkouts();
+        fetchPrograms();
     }, [modalOpen]);
 
-    console.log(workouts);
+    const navigation = useNavigation();
 
     return (
         <View style={[styles.container, { paddingHorizontal }]}>
             <Text style={styles.title}>5/3/1 Program Editor</Text>
+            <Text style={styles.subtitle}>Select a program</Text>
 
-            <FlatList
-                data={workouts}
-                renderItem={({ item }) => (
-                    <>
-                        <WorkoutDayCard
-                            label={`Week ${item.week} - day ${item.day} - ${item.mainExercise}`}
+            {programs &&
+                programs.map((program) => {
+                    return (
+                        <ProgramCard
+                            name={program.name}
+                            key={program.id}
                             onPress={() => {
-                                setModalOpen(true);
-                                setCurrentWorkout(item);
+                                navigation.push('Workout Content', {
+                                    program: program,
+                                });
                             }}
                         />
-                    </>
-                )}
-                keyExtractor={(item) => item.id}
-            />
+                    );
+                })}
+
             <PrimaryButton
-                label='Add new workout'
-                onPress={() => {
-                    setModalOpen(true);
-                    setCurrentWorkout(null);
-                }}
+                label='Add new program'
+                onPress={() => setModalOpen(true)}
             />
 
             <Modal
@@ -86,15 +79,28 @@ const ProgramEditorScreen = () => {
                 animationConfig={{ duration: 100 }}
                 transparent={true}
             >
-                <ProgramEditorFormComponent
-                    isWideScreen={isWideScreen}
-                    setModalOpen={setModalOpen}
-                    currentWorkout={currentWorkout}
-                    workoutsCollectionRef={workoutsCollectionRef}
-                    documentRef={currentWorkout?.id}
-                />
+                <ProgramEditorFormComponent setModalOpen={setModalOpen} />
             </Modal>
         </View>
+    );
+};
+
+const ProgramTab = () => {
+    return (
+        <Stack.Navigator>
+            <Stack.Screen
+                name='Program Content'
+                component={ProgramEditorScreen}
+                options={{ header: () => <HeaderComponent /> }}
+            />
+            <Stack.Screen
+                name='Workout Content'
+                component={WorkoutEditorScreen}
+                options={{
+                    header: () => <HeaderComponent showBackBtn={true} />,
+                }}
+            />
+        </Stack.Navigator>
     );
 };
 
@@ -115,4 +121,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ProgramEditorScreen;
+export default ProgramTab;

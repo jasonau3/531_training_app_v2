@@ -84,8 +84,8 @@ const LoginScreen = () => {
                 // Add initial workout and personal records documents to subcollections
                 await addDoc(workoutsCollectionRef, {
                     title: 'My First Workout',
-                    start: startTime,
-                    endTime: currentTime,
+                    startTime: new Date(),
+                    endTime: new Date(),
                 });
 
                 await addDoc(personalRecordsCollectionRef, {

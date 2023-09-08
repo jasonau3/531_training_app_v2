@@ -15,14 +15,18 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.jasonaudev.training531appv2"
+      "package": "com.jasonaudev.training531appv2",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -31,6 +35,9 @@
       "eas": {
         "projectId": "ef8bdf2a-7c14-494b-a1ca-6503ff2ac111"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ef8bdf2a-7c14-494b-a1ca-6503ff2ac111"
     }
   }
 }

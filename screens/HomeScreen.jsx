@@ -212,7 +212,7 @@ const TabScreen = () => {
                 name='Program'
                 component={ProgramTabScreen}
                 options={{
-                    header: () => <HeaderComponent />,
+                    headerShown: false,
                     tabBarLabel: 'Program',
                     tabBarIcon: ({ color, size }) => (
                         <FontAwesome5 name='dumbbell' color={color} size={18} />
