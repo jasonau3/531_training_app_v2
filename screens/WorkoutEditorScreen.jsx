@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 
-import { db } from '../firebase';
-import { collection, addDoc, doc, getDocs } from 'firebase/firestore';
+import { auth, db } from '../firebase';
+import { collection, setDoc, doc, getDocs } from 'firebase/firestore';
 
 import WorkoutDayCard from '../components/WorkoutDayCard';
 import WorkoutEditorFormComponent from '../components/WorkoutEditorFormComponent';
@@ -29,6 +29,7 @@ const WorkoutEditorScreen = ({ route }) => {
 
     const [modalOpen, setModalOpen] = useState(false);
     const [trainingMax, setTrainingMax] = useState(0);
+    const [programWeeks, setProgramWeeks] = useState(0);
     const [programName, setprogramName] = useState('');
     const [myWorkouts, setMyWorkouts] = useState([]);
     const [currentWorkout, setCurrentWorkout] = useState([]);
@@ -40,16 +41,6 @@ const WorkoutEditorScreen = ({ route }) => {
 
     const programSnapshot = doc(db, 'programs', myProgramId);
     const workoutCollectionsRef = collection(programSnapshot, 'workouts');
-
-    // const test = async () => {
-    //     console.log(workoutCollectionsRef);
-
-    //     querySnapshot
-    //     querySnapshot.forEach((doc) => {
-    //         console.log('Document ID:', doc.id);
-    //     });
-    // };
-    // test();
 
     useEffect(() => {
         const fetchWorkouts = async () => {
@@ -76,15 +67,24 @@ const WorkoutEditorScreen = ({ route }) => {
 
         fetchWorkouts();
         setTrainingMax(program.trainingMax);
+        setProgramWeeks(program.programWeeks);
         setprogramName(program.name);
     }, [modalOpen]);
 
-    console.log(myWorkouts);
+    const setUserProgram = async (programName) => {
+        const userDocRef = doc(db, 'users', auth.currentUser.uid);
+        await setDoc(userDocRef, { program_id: programName }, { merge: true });
+    };
 
     return (
         <View style={[styles.container, { paddingHorizontal }]}>
             <View>
                 <Text style={styles.title}>Program Name: {programName}</Text>
+
+                <PrimaryButton
+                    label='Set as current program'
+                    onPress={() => setUserProgram(myProgramId)}
+                />
 
                 <View style={styles.rowContainer}>
                     <Text style={styles.subtitle}>Training Max %</Text>
@@ -96,6 +96,16 @@ const WorkoutEditorScreen = ({ route }) => {
                         keyboardType='numeric'
                     />
                 </View>
+                <View style={styles.rowContainer}>
+                    <Text style={styles.subtitle}>Program week length</Text>
+                    <TextInput
+                        style={[styles.input, styles.smallInput]}
+                        placeholder='Program week length'
+                        value={program.programWeeks}
+                        onChangeText={setProgramWeeks}
+                        keyboardType='numeric'
+                    />
+                </View>
             </View>
 
             <FlatList
@@ -103,7 +113,7 @@ const WorkoutEditorScreen = ({ route }) => {
                 renderItem={({ item }) => (
                     <>
                         <WorkoutDayCard
-                            label={`Week ${item.week} - day ${item.day} - ${item.mainExercise}`}
+                            label={`Week ${item.week} - Day ${item.day}`}
                             onPress={() => {
                                 setModalOpen(true);
                                 setCurrentWorkout(item);

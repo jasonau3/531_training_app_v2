@@ -40,41 +40,24 @@ const WorkoutEditorFormComponent = ({
 
     const workoutCollectionsRef = collection(programRef, 'workouts');
 
-    const test = async () => {
-        console.log(workoutCollectionsRef);
-
-        const querySnapshot = await getDocs(workoutCollectionsRef);
-        querySnapshot.forEach((doc) => {
-            console.log('Document ID:', doc.id);
-        });
-    };
-    test();
-
     // Set initial values for states if currentWorkout has data
     useEffect(() => {
         if (currentWorkout) {
             setWeek(currentWorkout.week);
             setDay(currentWorkout.day);
-            setMainExercise(currentWorkout.mainExercise);
             setMainSets(currentWorkout.mainSets);
             setAccessories(currentWorkout.accessories);
         }
     }, [currentWorkout]);
 
     const handleSaveWorkout = async () => {
-        if (mainExercise.trim() === '') {
-            return;
-        }
-
         // if no current id, then its an existing record
         if (currentWorkout?.id) {
             try {
-                // TODO: Fix this
                 const updatedWorkout = {
                     name: `${week}-${day}-${mainExercise}`,
                     week: parseInt(week),
                     day: parseInt(day),
-                    mainExercise: mainExercise,
                     mainSets: mainSets,
                     accessories: accessories,
                 };
@@ -99,7 +82,6 @@ const WorkoutEditorFormComponent = ({
                     name: `${week}-${day}-${mainExercise}`,
                     week: parseInt(week),
                     day: parseInt(day),
-                    mainExercise: mainExercise,
                     mainSets: mainSets,
                     accessories: accessories,
                 };
@@ -132,6 +114,7 @@ const WorkoutEditorFormComponent = ({
             percentage.trim() !== ''
         ) {
             const newMainSet = {
+                name: mainExercise,
                 sets: sets,
                 reps: reps,
                 percentage: percentage,
@@ -139,12 +122,13 @@ const WorkoutEditorFormComponent = ({
             setMainSets([...mainSets, newMainSet]);
 
             // Reset input fields
+            setMainExercise('');
             setSets('');
             setReps('');
             setPercentage('');
         }
     };
-
+    console.log(mainSets);
     const handleAddAccessorySet = () => {
         if (accessoryExercise.trim() !== '' && accessoryReps.trim() !== '') {
             const newAccessory = {
@@ -211,12 +195,6 @@ const WorkoutEditorFormComponent = ({
                             onChangeText={setDay}
                             keyboardType='numeric'
                         />
-                        <TextInput
-                            style={[styles.input, styles.largeInput]}
-                            placeholder='Main Exercise'
-                            value={mainExercise}
-                            onChangeText={setMainExercise}
-                        />
                     </View>
 
                     <Text style={styles.subtitle}>Main Sets</Text>
@@ -244,6 +222,15 @@ const WorkoutEditorFormComponent = ({
 
                             <TextInput
                                 style={styles.input}
+                                placeholder='Main Exercise Name'
+                                value={set.name}
+                                onChangeText={(newName) =>
+                                    handleEditMainSet(index, 'name', newName)
+                                }
+                            />
+
+                            <TextInput
+                                style={styles.input}
                                 placeholder='Sets'
                                 value={set.sets.toString()}
                                 onChangeText={(newSets) =>
@@ -254,11 +241,11 @@ const WorkoutEditorFormComponent = ({
                             <TextInput
                                 style={styles.input}
                                 placeholder='Reps'
-                                value={set.reps.toString()}
+                                value={set.reps}
                                 onChangeText={(newReps) =>
                                     handleEditMainSet(index, 'reps', newReps)
                                 }
-                                keyboardType='numeric'
+                                keyboardType='string'
                             />
                             <TextInput
                                 style={styles.input}
@@ -285,6 +272,13 @@ const WorkoutEditorFormComponent = ({
                     >
                         <TextInput
                             style={[styles.input, styles.largeInput]}
+                            placeholder='Name'
+                            value={mainExercise}
+                            onChangeText={setMainExercise}
+                            keyboardType='string'
+                        />
+                        <TextInput
+                            style={[styles.input, styles.largeInput]}
                             placeholder='Sets'
                             value={sets}
                             onChangeText={setSets}
@@ -295,7 +289,7 @@ const WorkoutEditorFormComponent = ({
                             placeholder='Reps'
                             value={reps}
                             onChangeText={setReps}
-                            keyboardType='numeric'
+                            keyboardType='string'
                         />
                         <TextInput
                             style={[styles.input, styles.largeInput]}

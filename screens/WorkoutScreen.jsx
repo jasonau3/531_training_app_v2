@@ -50,7 +50,7 @@ const WorkoutScreen = ({ route }) => {
 
         try {
             await addDoc(workoutsCollectionRef, {
-                title: workout.mainExercise + ' - ' + week + ' - ' + day,
+                title: week + ' - ' + day,
                 startTime: startTime,
                 endTime: currentTime,
             });
@@ -59,6 +59,17 @@ const WorkoutScreen = ({ route }) => {
         } catch {
             console.error('Error adding workout to history');
         }
+    };
+
+    const calculateWeight = (curSet) => {
+        const result =
+            Math.round(
+                ((parseFloat(curSet.percentage) / 100) *
+                    (myPR[curSet.name.toLowerCase()] * 0.9)) /
+                    1.25
+            ) * 1.25;
+
+        return result;
     };
 
     return (
@@ -71,17 +82,11 @@ const WorkoutScreen = ({ route }) => {
                 {workout.mainSets.map((curSet, index) => (
                     <ExerciseCard
                         key={index}
-                        name={workout.mainExercise}
+                        name={curSet.name}
                         isMainSet={true}
                         sets={curSet.sets}
                         reps={curSet.reps}
-                        weight={
-                            Math.round(
-                                ((curSet.percentage / 100) *
-                                    (myPR[workout.mainExercise] * 0.9)) /
-                                    1.25
-                            ) * 1.25
-                        } // rounds to the nearest 1.25lb
+                        weight={calculateWeight(curSet)}
                         setModalOpen={setModalOpen}
                     />
                 ))}

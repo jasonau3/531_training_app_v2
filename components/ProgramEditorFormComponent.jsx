@@ -12,6 +12,7 @@ const ProgramEditorFormComponent = ({ setModalOpen }) => {
 
     const [programName, setProgramName] = useState('');
     const [trainingMax, setTrainingMax] = useState('');
+    const [programWeeks, setProgramWeeks] = useState(0);
 
     const handleSaveProgram = async () => {
         const programRef = collection(db, 'programs');
@@ -19,6 +20,7 @@ const ProgramEditorFormComponent = ({ setModalOpen }) => {
         await addDoc(programRef, {
             name: programName,
             trainingMax: trainingMax,
+            programWeeks: programWeeks,
         });
 
         setModalOpen(false);
@@ -62,6 +64,22 @@ const ProgramEditorFormComponent = ({ setModalOpen }) => {
                         placeholder='Training Max %'
                         value={trainingMax}
                         onChangeText={setTrainingMax}
+                        keyboardType='numeric'
+                    />
+                </View>
+
+                <View
+                    style={
+                        isWideScreen
+                            ? styles.rowContainer
+                            : styles.columnContainer
+                    }
+                >
+                    <TextInput
+                        style={[styles.input, styles.smallInput]}
+                        placeholder='# of training weeks'
+                        value={programWeeks}
+                        onChangeText={setProgramWeeks}
                         keyboardType='numeric'
                     />
                 </View>

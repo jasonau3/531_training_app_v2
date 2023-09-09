@@ -19,21 +19,27 @@ const ProgramCard = ({ name, onPress }) => {
 
 export default ProgramCard;
 
+const cardSize = 150; // Set the desired width and height of the card
+
 const styles = StyleSheet.create({
     container: {
-        padding: 10,
+        width: cardSize,
+        height: cardSize,
         borderRadius: 8,
         marginVertical: 5,
     },
     pressable: {
+        flex: 1, // To fill the entire card
         borderRadius: 8,
         elevation: 5,
         padding: 15,
         borderWidth: 1,
         borderColor: 'grey',
+        justifyContent: 'center', // Center the text vertically
     },
     text: {
         fontSize: 18,
         fontWeight: 'bold',
+        textAlign: 'center', // Center the text horizontally
     },
 });

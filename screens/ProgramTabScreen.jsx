@@ -53,20 +53,22 @@ const ProgramEditorScreen = () => {
             <Text style={styles.title}>5/3/1 Program Editor</Text>
             <Text style={styles.subtitle}>Select a program</Text>
 
-            {programs &&
-                programs.map((program) => {
-                    return (
-                        <ProgramCard
-                            name={program.name}
-                            key={program.id}
-                            onPress={() => {
-                                navigation.push('Workout Content', {
-                                    program: program,
-                                });
-                            }}
-                        />
-                    );
-                })}
+            <View style={styles.programContainer}>
+                {programs &&
+                    programs.map((program) => {
+                        return (
+                            <ProgramCard
+                                name={program.name}
+                                key={program.id}
+                                onPress={() => {
+                                    navigation.push('Workout Content', {
+                                        program: program,
+                                    });
+                                }}
+                            />
+                        );
+                    })}
+            </View>
 
             <PrimaryButton
                 label='Add new program'
@@ -118,6 +120,10 @@ const styles = StyleSheet.create({
     subtitle: {
         fontSize: 18,
         marginBottom: 10,
+    },
+    programContainer: {
+        flexDirection: 'row',
+        gap: 20,
     },
 });
 

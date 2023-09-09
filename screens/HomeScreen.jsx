@@ -9,6 +9,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { auth, db } from '../firebase';
 import {
     getDocs,
+    getDoc,
     collection,
     doc,
     query,
@@ -40,7 +41,8 @@ const HomeContent = () => {
     );
 
     const [personalRecords, setPersonalRecords] = useState(null);
-    const [myWorkout, setMyWorkout] = useState(null);
+    const [myWorkouts, setMyWorkouts] = useState(null);
+    const [myProgram, setMyProgram] = useState(null);
     const [currentWeek, setCurrentWeek] = useState(1);
 
     const usersCollectionRef = collection(db, 'users');
@@ -53,7 +55,6 @@ const HomeContent = () => {
         userDocRef,
         'workout_history'
     );
-    const workoutsCollectionRef = collection(db, 'workouts');
 
     const navigation = useNavigation();
     const isFocused = useIsFocused();
@@ -75,13 +76,29 @@ const HomeContent = () => {
                 setPersonalRecords(personalRecordsData);
 
                 // get workout data
+                const userDocSnapshot = await getDoc(userDocRef);
+                const userProgramId = userDocSnapshot.data().program_id;
+
+                const programCollectionRef = collection(db, 'programs');
+                const programDocRef = doc(programCollectionRef, userProgramId);
+                const programDocSnapshot = await getDoc(programDocRef);
+                const programData = {
+                    id: programDocSnapshot.id,
+                    ...programDocSnapshot.data(),
+                };
+                setMyProgram(programData);
+
+                const workoutsCollectionRef = collection(
+                    programDocRef,
+                    'workouts'
+                );
                 const workoutsSnapshot = await getDocs(workoutsCollectionRef);
                 const workoutsData = workoutsSnapshot.docs.map((doc) => ({
                     id: doc.id,
                     ...doc.data(),
                 }));
                 const sortedData = sortByName(workoutsData);
-                setMyWorkout(sortedData);
+                setMyWorkouts(sortedData);
 
                 // get most recent workout and set the current week to that week
                 const recentWorkoutQuery = query(
@@ -115,32 +132,31 @@ const HomeContent = () => {
             <ScrollView>
                 <View style={styles.week_btns}>
                     <ScrollView horizontal={true}>
-                        {[1, 2, 3, 4].map((week) => {
-                            return (
-                                <WeekButton
-                                    label={`Week ${week}`}
-                                    onPress={() => setCurrentWeek(week)}
-                                    isCompleted={currentWeek === week}
-                                    key={week}
-                                />
-                            );
-                        })}
+                        {Array.from(
+                            { length: myProgram?.programWeeks || 0 },
+                            (_, index) => {
+                                const week = index + 1;
+                                return (
+                                    <WeekButton
+                                        label={`Week ${week}`}
+                                        onPress={() => setCurrentWeek(week)}
+                                        isCompleted={currentWeek === week}
+                                        key={week}
+                                    />
+                                );
+                            }
+                        )}
                     </ScrollView>
                 </View>
 
                 <View style={styles.day_btns}>
-                    {myWorkout &&
-                        myWorkout
+                    {myWorkouts &&
+                        myWorkouts
                             .filter((workout) => workout.week === currentWeek)
                             .map((workout) => {
                                 return (
                                     <WorkoutDayCard
-                                        label={`Day ${workout.day} - ${
-                                            workout.mainExercise
-                                                .charAt(0)
-                                                .toUpperCase() +
-                                            workout.mainExercise.slice(1)
-                                        }`}
+                                        label={`Day ${workout.day}`}
                                         onPress={() =>
                                             navigation.push('Workout', {
                                                 week: workout.week,
