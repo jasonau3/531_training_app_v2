@@ -164,6 +164,8 @@ const HomeContent = () => {
                                                 personalRecords:
                                                     personalRecords,
                                                 workout: workout,
+                                                trainingMax:
+                                                    myProgram.trainingMax,
                                             })
                                         }
                                         key={workout.id}

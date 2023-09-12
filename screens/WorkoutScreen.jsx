@@ -22,7 +22,7 @@ import PrimaryButton from '../components/PrimaryButton';
 import ExerciseForm from '../components/ExerciseForm';
 
 const WorkoutScreen = ({ route }) => {
-    const { week, day, personalRecords, workout } = route.params;
+    const { week, day, personalRecords, workout, trainingMax } = route.params;
     const [modalOpen, setModalOpen] = useState(false);
 
     const [startTime, setStartTime] = useState(null);
@@ -65,7 +65,7 @@ const WorkoutScreen = ({ route }) => {
         const result =
             Math.round(
                 ((parseFloat(curSet.percentage) / 100) *
-                    (myPR[curSet.name.toLowerCase()] * 0.9)) /
+                    ((myPR[curSet.name.toLowerCase()] * trainingMax) / 100)) /
                     1.25
             ) * 1.25;
 
