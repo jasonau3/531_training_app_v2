@@ -10,9 +10,9 @@ This is a workout app that primarily follows the 5/3/1 training program, but use
 
 ### Installing
 
-* To run, scan the QR code into Expo:
-* ![image](https://github.com/jasonau3/531_training_app_v2/assets/98290381/f5685b03-7912-4fbc-97ae-8a3d0c5ee1bf) Android
-* ![image](https://github.com/jasonau3/531_training_app_v2/assets/98290381/8ae1d722-228c-4683-b80f-e27f27105191) iOS
+* To run, scan the QR code into the Expo app:
+* <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/98290381/270505185-f5685b03-7912-4fbc-97ae-8a3d0c5ee1bf.png" width="200"> Android
+* <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/98290381/270505224-8ae1d722-228c-4683-b80f-e27f27105191.png" width="200"> Android
 
 ### User Guide
 
